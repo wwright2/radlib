@@ -1,0 +1,34 @@
+radlib template process README
+----------------------------------
+
+This directory contains a sample process structure utilizing radlib.
+Type "make" to build then run it by typing "./templated".  This sample
+process will initialize two timers set to expire every 5 and 12 seconds
+respectively.  It also registers stdin as an IO descriptor so that any
+input from the shell will be echoed back to stdout.  It does not run as
+a true daemon (see radProcessInit for details) so that stdin can be used
+for example purposes.
+
+The purpose of this template is two-fold: first, to demonstrate how a
+process is best constructed using radlib (including the state machine), 
+and second, to provide an example of the event-driven, multiple stimulus
+capabilities of a radlib process.  Obviously the interprocess 
+communications capabilities of radlib cannot be demonstrated with one 
+process.  Nonetheless, an event handler and a message queue handler are
+initialized in this template process and the state handlers have "empty"
+cases for events and queue messages.
+
+These files are a good starting point for creating your own processes
+using the capabilities of radlib.
+
+To build, execute "make" (gmake for BSDs) from this directory.
+
+
+File List
+---------
+
+Makefile                    makefile for the template
+rules.mk                    general make rules
+template.h                  header file for the template
+template.c                  entry point and radlib initialization
+templateStates.c            the template process state machine handlers

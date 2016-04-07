@@ -1,0 +1,67 @@
+radlib Template Application
+---------------------------
+
+This directory contains a sample/template multiprocess application using radlib.
+
+
+CONTENTS
+--------
+
+    runtemplates       - simple script to start and stop the template processes
+    template.h         - header file for both template processes
+    template.c         - the 'templated' process entry point and utilities
+    templateStates.c   - the 'templated' process state machine handlers
+    template2.c        - the 'template2d' process entry point and utilities
+    templateStates2.c  - the 'template2d' process state machine handlers
+    Makefile           - simple GNU makefile to build the processes
+    rules.mk           - makefile rules
+    README             - this file
+
+
+PROCESSES
+---------
+
+    radmrouted       - the standard radlib message router built and installed 
+                       when radlib is installed
+    templated        - a non-daemon radlib process which provides standard I/O 
+                       on stdin/stdout
+    template2d       - a daemon radlib process which does simple prime number 
+                       calculations based on receive messages from 'templated'
+
+
+DESCRIPTION
+-----------
+
+The 'templated' process will initialize two timers set to expire every 15 and 33
+seconds respectively.  It also registers stdin as an IO descriptor so that 
+numbers input from the shell will be sent to 'template2d' via a message. When 
+'template2d' sends the result message it prints the result to stdout. It does 
+not run as true daemon (see radProcessInit for details) so that stdin/stdout can 
+be used for example purposes.
+
+The 'template2d' daemon receives messages from 'templated' containing a positive
+integer, computes how many prime numbers exist which are less than the number, 
+then sends a message back to 'templated' containing the result.
+
+The purpose of this template is two-fold: first, to demonstrate how a
+multi-process application is best constructed using radlib (including the state 
+machines), and second to provide an example of the event-driven, multiple 
+stimulus capabilities of radlib processes. It can be used as a template for the
+development of new radlib applications. It also serves as a ready-to-build
+"Getting Started" type of example application.
+
+
+BUILDING
+--------
+
+Execute "make" (gmake for BSDs) from this directory
+
+
+RUNNING
+-------
+
+Execute "./runtemplates start" from this directory
+
+To stop: "./runtemplates stop"
+
+

@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# start-templates	Start/Stop the radlib example template processes
+#
+# processnames: templated template2d
+#
+#
+
+# add to the shared library search path
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+
+
+# set the base directory
+echo `pwd`
+
+RUN_DIRECTORY=.
+INSTALL_DIR=.
+RADLIB_INSTALL_DIR=/usr/local/bin
+
+TEMPLATE_BIN=$INSTALL_DIR/templated
+TEMPLATE2_BIN=$INSTALL_DIR/template2d
+RADROUTER_BIN=$RADLIB_INSTALL_DIR/radmrouted
+
+TEMPLATE_PID=$RUN_DIRECTORY/template.pid
+TEMPLATE2_PID=$RUN_DIRECTORY/template2.pid
+RADROUTER_PID=$RUN_DIRECTORY/radmrouted.pid
+
+case "$1" in
+    start)
+	echo "Starting radlib message router and templates:"
+	if [ -f $RADROUTER_PID ]; then
+		echo "radlib router pid file $RADROUTER_PID exists - killing existing process"
+		kill -15 `cat $RADROUTER_PID`
+		rm -f $RADROUTER_PID
+	fi
+	if [ -f $TEMPLATE_PID ]; then
+		echo "radlib router pid file $TEMPLATE_PID exists - killing existing process"
+		kill -15 `cat $TEMPLATE_PID`
+		rm -f $TEMPLATE_PID
+	fi
+	if [ -f $TEMPLATE2_PID ]; then
+		echo "radlib router pid file $TEMPLATE2_PID exists - killing existing process"
+		kill -15 `cat $TEMPLATE2_PID`
+		rm -f $TEMPLATE2_PID
+	fi
+
+#	start the radlib message router - 
+#	he runs as a daemon, so control will be returned to this script
+#	pass him the radlib system ID and the working directory
+	if [ -x $RADROUTER_BIN ]; then
+	    $RADROUTER_BIN 11 $RUN_DIRECTORY
+	else
+	    echo "Cannot find $RADROUTER_BIN - exiting!"
+	    exit 10
+	fi
+	sleep 1
+#	start the template2d daemon - 
+#	he runs as a daemon, so control will be returned to this script
+	if [ -x $TEMPLATE2_BIN ]; then
+	    $TEMPLATE2_BIN
+	else
+	    echo "Cannot find $TEMPLATE2_BIN - exiting!"
+	    exit 10
+	fi
+#	start the templated process - 
+#	he does not run as a daemon, so control will NOT be returned to this script
+#	until <CTRL-C> stops the process (or 'runtemplates stop' from another shell)
+	if [ -x $TEMPLATE_BIN ]; then
+	    $TEMPLATE_BIN
+	else
+	    echo "Cannot find $TEMPLATE_BIN - exiting!"
+	    exit 10
+	fi
+    ;;
+
+    stop)
+	echo "Shutting down radlib message router and templates..."
+	if [ -f $TEMPLATE_PID ]; then
+	    kill -15 `cat $TEMPLATE_PID`
+	fi
+	if [ -f $TEMPLATE2_PID ]; then
+	    kill -15 `cat $TEMPLATE2_PID`
+	fi
+#	give the template processes time to shutdown
+	sleep 1
+	if [ -f $RADROUTER_PID ]; then
+	    kill -15 `cat $RADROUTER_PID`
+	fi
+    ;;
+
+    restart)
+	$0 stop  && sleep 2
+	$0 start
+    ;;
+
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit 0
+
